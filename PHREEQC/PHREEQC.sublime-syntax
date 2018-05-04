@@ -1,0 +1,85 @@
+%YAML 1.2
+---
+name: PHREEQC
+file_extensions: [phr, dat]
+scope: source.phr
+
+contexts:
+  main:
+    - include: comments
+
+    - match: \b(LLNL_AQUEOUS_MODEL_PARAMETERS|NAMED_EXPRESSIONS|ADVECTION|DATABASE|END|EQUILIBRIUM_PHASES|EXCHANGE|EXCHANGE_MASTER_SPECIES|EXCHANGE_SPECIES|GAS_PHASE|INCLUDE|INCREMENTAL_REACTIONS|INVERSE_MODELING|KINETICS|KNOBS|MIX|PHASES|PRINT|RATES|REACTION|REACTION_TEMPERATURE|SAVE|SELECTED_OUTPUT|SOLID_SOLUTIONS|SOLUTION|SOLUTION_MASTER_SPECIES|SOLUTION_SPECIES|SURFACE|SURFACE_MASTER_SPECIES|SURFACE_SPECIES|TITLE|TRANSPORT|USE|USER_PRINT|USER_PUNCH|USER_GRAPH|END)\b
+      scope: keyword.other.phr
+
+    - match: \$
+      scope: entity.name.tag.phr
+
+    - match: (redox|pe|charge|pH|delta_h|units|temp|density|-steps|-formula|-m|-parms|-tol|-analytical_expression|-analytic|-delta_H|log_k|-llnl_gamma|-temperatures|-dh_a|-dh_b|-bdot|-co2_coefs|-file|-false|-true|-reset|detatch|-units|-density|-water|-molalities|-headings|-chart_title|-detach|-axis_titles|-iterations|-convergence_tolerance|-tolerance|-step_size|-pe_step_size|-diagonal_scale|-debug_diffuse_layer|-debug_inverse|-debug_model|-debug_prep|-debug_set|-logfile|-isotope|-totals|-selected_out|-user_punch|-high_precision|-simulation|-state|-solution|-distance|-time|-step|-pH|-reaction|-activities|-equilibrium_phases|-saturation_indices|-gases|-kinetic_reactants|-solid_solution|-inverse_modeling|-temperature|-percent_error|-alkalinity|-charge|-pe)
+      scope: keyword.other.phr
+
+    # - match: ^\s*(\d+)(.*)$
+    #   captures:
+    #     1: constant.numeric.phr
+    #   push: basic
+
+    - match: ^\s*-start\s*$
+      scope: keyword.other.phr
+      push: basic
+
+    - match: (?<![(\w)+])(\+|-)?\d+(\.\d*)?((e|E)(\+|-)?\d+)?(?![\w+])
+      scope: constant.numeric.phr
+
+    - match: \(
+      push: brackets
+
+    - match: \)
+      scope: invalid.illegal.stray-bracket-end
+
+  brackets:
+    - match: \)
+      pop: true
+    - include: main
+
+  basic:
+    - include: comments
+
+    - match: ^\s*-end\s*$
+      scope: keyword.other.phr
+      pop: true
+
+    - match: ^\s*(\d+)\b
+      scope: constant.numeric.phr
+
+    - match: \b(AND|OR|XOR|NOT|ABS|ARCTAN|ASC|CHR|CEIL|COS|DATA|DIM|END|EOL|ERASE|EXP|FLOOR|FOR|NEXT|GOSUB|GOTO|IF|INSTR|LEN|LOG|LOG10|LTRIM|MID|MOD|ON|PAD|READ|REM|RESTORE|RETURN|RTRIM|SGN|SIN|SQR|SQRT|STR|STR_E|STR_F|TAN|TRIM|VAL|WHILE|WEND|ACT|ALK|CALC_VALUE|CELL_NO|CHANGE_POR|CHANGE_SURF|CHARGE_BALANCE|DESCRIPTION|DIFF_C|DH_A|DH_Av|DH_B|DIST|EDL|EOL|EPS_R|EQUI|EQUI_DELTA|EQUIV_FRAC|EXISTS|GAMMA|GAS|GAS_P|GAS_VM|GET|GET_POR|GRAPH_X|GRAPH_Y|GRAPH_SY-la|ISO|ISO_UNIT|KAPPA|KIN|KIN_DELTA|KIN_TIME|LA|LG|LIST_S_S|LK_NAMED|LK_PHASE|LK_SPECIES|LM|M|M0|MISC1|MISC2|MOL|MU|OSMOTIC|PARM|PERCENT_ERROR|PHASE_FORMULA|PRINT|PR_P|PR_PHI GAS_PHASE.|PRESSURE|PUNCH|PUT|QBRN|RHO|RHO_0|RXN|SAVE|SC|SI|SIM_NO|SIM_TIME|SOLN_VOL|SPECIES_FORMULA$|SR|STEP_NO|SUM_GAS|SUM_SPECIES|SUM_S_S|SURF|SYS|S_S|TC|TK|TIME|TOT|TOTAL_TIME|TOTMOLE|VM)\b
+      scope: support.class.phr
+
+    - match: '"'
+      push: string
+
+    - match: (rem).*
+      scope: comment.line.phr
+
+    - match: \(
+      push: basicbrackets
+
+    - match: \)
+      scope: invalid.illegal.stray-bracket-end
+
+  basicbrackets:
+    - match: \)
+      pop: true
+    - include: main
+
+  string:
+    - meta_scope: string.quoted.double.phr
+    - match: \\.
+      scope: constant.character.escape.phr
+    - match: '"'
+      pop: true
+
+
+  comments:
+    - match: (#).*
+      scope: comment.line.phr
+    - match: ^\d+\s+REM\s.*
+      scope: comment.line.phr
